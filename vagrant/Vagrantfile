@@ -1,0 +1,26 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+APP_NAME = "geonode-test"
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.box = "precise32"
+
+  config.vm.hostname = APP_NAME
+  
+  config.vm.network "forwarded_port", guest: 22, host: 2222, id: "ssh"
+  config.vm.network "forwarded_port", guest: 80, host: 8001
+  config.vm.network "forwarded_port", guest: 8000, host: 8000
+  config.vm.network "forwarded_port", guest: 8080, host: 8080
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.name = APP_NAME
+    vb.customize ["modifyvm", :id, "--memory", "4096"]
+  end
+  
+  # Workaround for "stdin: is not a tty" issue
+  config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
+  
+  config.vm.provision :shell, path: "bootstrap.sh"
+end
